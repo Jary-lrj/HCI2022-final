@@ -1,3 +1,7 @@
+import threading
+
+import cv2
+import numpy as np
 from PyQt5.QtWidgets import *
 from PyQt5.QtMultimedia import *
 from PyQt5.QtGui import *
@@ -6,6 +10,22 @@ from PyQt5.QtMultimediaWidgets import QVideoWidget
 from GUI import Ui_Form
 from myVideoWidget import myVideoWidget
 import sys
+import HandTrackingThread as GestureThread  # Modules of hand tracking
+
+
+class VideoThread(threading.Thread):
+    def __init__(self):
+        super().__init__()
+        self.detector = GestureThread.handDetector(detectionCon=0.75)
+
+    def run(self):
+        cap = cv2.VideoCapture(0)
+        while True:
+            success, img = cap.read()
+            img = self.detector.findHands(img)
+            lm_list = self.detector.findPosition(img)
+            if len(lm_list) != 0:
+                print(lm_list[0])
 
 
 class myMainWindow(Ui_Form, QMainWindow):
@@ -29,6 +49,9 @@ class myMainWindow(Ui_Form, QMainWindow):
         self.video_process_slider.sliderReleased.connect(self.releaseSlider)
         self.video_process_slider.sliderPressed.connect(self.pressSlider)
         self.video_process_slider.sliderMoved.connect(self.moveSlider)
+        self.test_thread = VideoThread()
+        self.test_thread.setDaemon(True)  # it will close when the parent process closes.
+        self.test_thread.start()
 
     ###################################
     # function: move the process slider
@@ -55,6 +78,10 @@ class myMainWindow(Ui_Form, QMainWindow):
     def releaseSlider(self):
         self.video_process_slider_pressed = False
         print("released")
+
+    ###################################
+    # function: change the process slider
+    ###################################
 
     def changeSlide(self, position):
         if not self.video_process_slider_pressed:

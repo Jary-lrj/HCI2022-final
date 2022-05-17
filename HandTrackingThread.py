@@ -4,6 +4,7 @@ import time
 
 
 class handDetector():
+
     def __init__(self, mode=False, maxHands=2, model_complexity=1, detectionCon=0.5, trackCon=0.5):
         self.mode = mode
         self.maxHands = maxHands
@@ -43,7 +44,6 @@ class handDetector():
         return lm_list
 
 
-
 def main():
     pTime = 0
     cTime = 0
@@ -53,16 +53,16 @@ def main():
         success, img = cap.read()
         img = detector.findHands(img)
         lm_list = detector.findPosition(img)
-        if len(lm_list) != 0:
-            print(lm_list[0])
-
-        cTime = time.time()
-        fps = 1 / (cTime - pTime)
-        pTime = cTime
-        cv2.putText(img, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
-
-        cv2.imshow('Image', img)
-        cv2.waitKey(1)
+        # if len(lm_list) != 0:
+        #     print(lm_list[0])
+        # #
+        # cTime = time.time()
+        # fps = 1 / (cTime - pTime)
+        # pTime = cTime
+        # cv2.putText(img, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
+        # #
+        # # cv2.imshow('Image', img)
+        # # cv2.waitKey(1)
 
 
 if __name__ == "__main__":

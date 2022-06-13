@@ -19,7 +19,7 @@ from ImgQLabel import ImgQLabel
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(960, 640)
+        Form.resize(1024,640)
         self.video_area = QVideoWidget(Form)
         self.video_area.setGeometry(QtCore.QRect(0, 20, 791, 521))
         self.video_area.setObjectName("video_area")
@@ -54,15 +54,15 @@ class Ui_Form(object):
         self.score = QtWidgets.QMenu(self.menubar)
         self.score.setObjectName("score")
         self.video_process_slider = QtWidgets.QSlider(Form)
-        self.video_process_slider.setGeometry(QtCore.QRect(70, 560, 801, 22))
+        self.video_process_slider.setGeometry(QtCore.QRect(0, 560, 801, 22))
         self.video_process_slider.setOrientation(QtCore.Qt.Horizontal)
         self.video_process_slider.setObjectName("video_process_slider")
         self.video_process = QtWidgets.QLabel(Form)
-        self.video_process.setGeometry(QtCore.QRect(880, 560, 41, 21))
+        self.video_process.setGeometry(QtCore.QRect(820, 560, 100, 21))
         self.video_process.setStyleSheet("font: 10pt \"Times New Roman\";")
         self.video_process.setObjectName("video_process")
         self.video_list = QtWidgets.QListWidget(Form)
-        self.video_list.setGeometry(QtCore.QRect(790, 30, 171, 531))
+        self.video_list.setGeometry(QtCore.QRect(790, 30, 235, 521))
         self.video_list.setObjectName("video_list")
 
         self.player_volume = QtWidgets.QSlider(Form)

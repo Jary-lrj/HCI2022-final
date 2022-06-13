@@ -55,12 +55,14 @@ class myMainWindow(Ui_Form, QMainWindow):
         self.playlist = QMediaPlaylist(self)
         self.player.setPlaylist(self.playlist)
         self.playlist.setPlaybackMode(QMediaPlaylist.Loop)
-
         self.video_list.itemClicked.connect(self.playVideoFromList)
         self.previous.clicked.connect(self.preMedia)
         self.next.clicked.connect(self.nextMedia)
+        self.player_volume.setValue(50)
+        self.player_volume.setTickInterval(10)
+        self.player_volume.setTickPosition(QSlider.TicksBelow)
+        self.player_volume.valueChanged.connect(self.changeVolume)
         self.fileOpenAction.triggered.connect(self.openVideoFile)
-
         self.player.positionChanged.connect(self.changeSlide)  # change process slide of the video
         self.video_full_screen_widget.doubleClickedItem.connect(self.videoDoubleClicked)  # double click the video
         # self.video_area.doubleClickedItem.connect(self.videoDoubleClicked)
@@ -81,7 +83,9 @@ class myMainWindow(Ui_Form, QMainWindow):
         if self.player.duration() > 0:
             video_position = int((position / 100) * self.player.duration())
             self.player.setPosition(video_position)
-            self.video_process.setText(str(round(position, 2)) + '%')
+            cur = QDateTime.fromMSecsSinceEpoch(video_position).toString("mm:ss")
+            tot = QDateTime.fromMSecsSinceEpoch(self.player.duration()).toString("mm:ss")
+            self.video_process.setText(cur + '/' + tot)
 
     ###################################
     # function: press the process slider
@@ -107,7 +111,9 @@ class myMainWindow(Ui_Form, QMainWindow):
         if not self.video_process_slider_pressed:
             self.video_length = self.player.duration() + 0.1
             self.video_process_slider.setValue(round((position / self.video_length) * 100))
-            self.video_process.setText(str(round((position / self.video_length) * 100, 2)) + '%')
+            cur = QDateTime.fromMSecsSinceEpoch(position).toString("mm:ss")
+            tot = QDateTime.fromMSecsSinceEpoch(self.player.duration()).toString("mm:ss")
+            self.video_process.setText(cur + '/' + tot)
 
     def openVideoFile(self):
         mediaUrl = QFileDialog.getOpenFileUrl()[0]
@@ -137,7 +143,7 @@ class myMainWindow(Ui_Form, QMainWindow):
 
     def playVideoFromList(self, current):
         index = self.video_list.row(current)
-        self.player.setMedia(self.playlist.currentMedia())
+        self.player.setMedia(self.playlist.media(index))
         self.playlist.setCurrentIndex(index)
         self.player.play()
 
@@ -168,6 +174,9 @@ class myMainWindow(Ui_Form, QMainWindow):
         self.video_list.setCurrentRow(self.playlist.currentIndex())
         self.player.setMedia(self.playlist.media(self.playlist.currentIndex()))
         self.player.play()
+
+    def changeVolume(self, num):
+        self.player.setVolume(num)
 
 
 if __name__ == "__main__":

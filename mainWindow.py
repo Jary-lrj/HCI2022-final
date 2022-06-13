@@ -2,6 +2,7 @@ import threading
 
 import cv2
 import numpy as np
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtMultimedia import *
 from PyQt5.QtGui import *
@@ -11,6 +12,7 @@ from GUI import Ui_Form
 from myVideoWidget import myVideoWidget
 import sys
 import HandTrackingThread as GestureThread  # Modules of hand tracking
+from qt_material import apply_stylesheet
 
 
 class VideoThread(threading.Thread):
@@ -28,10 +30,21 @@ class VideoThread(threading.Thread):
                 print(lm_list[0])
 
 
+class QSSLoader:
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def read_qss_file(qss_file_name):
+        with open(qss_file_name, 'r', encoding='UTF-8') as file:
+            return file.read()
+
+
 class myMainWindow(Ui_Form, QMainWindow):
     def __init__(self):
         super(Ui_Form, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("手势识别互动多媒体播放器")
         self.video_process_slider_pressed = False
         self.video_full_screen = False
         self.video_full_screen_widget = myVideoWidget()
@@ -39,9 +52,14 @@ class myMainWindow(Ui_Form, QMainWindow):
         self.video_full_screen_widget.hide()
         self.player = QMediaPlayer()
         self.player.setVideoOutput(self.video_area)
-        self.file_button.clicked.connect(self.openVideoFile)  # function of open a file
-        self.play_button.clicked.connect(self.playVideo)  # play video
-        self.pause_button.clicked.connect(self.pauseVideo)  # pause video
+
+        self.fileOpenAction.triggered.connect(self.openVideoFile)
+        # self.isPlaying = False
+        # if self.isPlaying:
+        #     self.play_button2.clicked.connect(self.pauseVideo)  # play video
+        # else:
+        #     self.play_button2.clicked.connect(self.playVideo)
+
         self.player.positionChanged.connect(self.changeSlide)  # change process slide of the video
         self.video_full_screen_widget.doubleClickedItem.connect(self.videoDoubleClicked)  # double click the video
         # self.video_area.doubleClickedItem.connect(self.videoDoubleClicked)
@@ -92,12 +110,22 @@ class myMainWindow(Ui_Form, QMainWindow):
     def openVideoFile(self):
         self.player.setMedia(QMediaContent(QFileDialog.getOpenFileUrl()[0]))  # 选取视频文件
         self.player.play()  # 播放视频
+        self.play_button2.setPixmap(QPixmap('D:\\HCI2022\\final\\assets\\pause.png'))
+        self.play_button2.clicked.connect(self.pauseVideo)
 
     def playVideo(self):
         self.player.play()
+        self.play_button2.setPixmap(QPixmap('D:\\HCI2022\\final\\assets\\pause.png'))
+        self.play_button2.clicked.disconnect()
+        self.play_button2.clicked.connect(self.pauseVideo)
+        print(1)
 
     def pauseVideo(self):
         self.player.pause()
+        self.play_button2.clicked.disconnect()
+        self.play_button2.setPixmap(QPixmap('D:\\HCI2022\\final\\assets\\play-button.png'))
+        self.play_button2.clicked.connect(self.playVideo)
+        print(2)
 
     def videoDoubleClicked(self, text):
         if self.player.duration() > 0:
@@ -114,9 +142,16 @@ class myMainWindow(Ui_Form, QMainWindow):
                 self.player.play()
                 self.video_full_screen = True
 
+    def test(self):
+        print(3)
+
+    def test2(self):
+        print(4)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     video_gui = myMainWindow()
+    apply_stylesheet(app, 'dark_blue.xml')
     video_gui.show()
     sys.exit(app.exec_())

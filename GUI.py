@@ -31,14 +31,14 @@ class Ui_Form(object):
         self.play_button2.setMaximumSize(25, 25)
         self.play_button2.setScaledContents(True)
 
-        self.previous = QtWidgets.QLabel(Form)
+        self.previous = ImgQLabel(Form)
         self.previous.setPixmap(QPixmap("D:\\HCI2022\\final\\assets\\previous.png"))
         self.previous.setObjectName("previous")
         self.previous.setGeometry(QtCore.QRect(300, 590, 71, 41))
         self.previous.setMaximumSize(25, 25)
         self.previous.setScaledContents(True)
 
-        self.next = QtWidgets.QLabel(Form)
+        self.next = ImgQLabel(Form)
         self.next.setPixmap(QPixmap("D:\\HCI2022\\final\\assets\\next.png"))
         self.next.setObjectName("next")
         self.next.setGeometry(QtCore.QRect(580, 590, 71, 41))
@@ -61,8 +61,8 @@ class Ui_Form(object):
         self.video_process.setGeometry(QtCore.QRect(880, 560, 41, 21))
         self.video_process.setStyleSheet("font: 10pt \"Times New Roman\";")
         self.video_process.setObjectName("video_process")
-        self.video_list = QtWidgets.QLabel(Form)
-        self.video_list.setGeometry(QtCore.QRect(1280, 960, 171, 491))
+        self.video_list = QtWidgets.QListWidget(Form)
+        self.video_list.setGeometry(QtCore.QRect(790, 30, 171, 531))
         self.video_list.setObjectName("video_list")
 
         self.player_volume = QtWidgets.QSlider(Form)
@@ -87,8 +87,6 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        self.video_process.setText(_translate("Form", "25%"))
-        self.video_list.setText(_translate("Form", "test"))
         self.file.setTitle(_translate("Form", "文件"))
         self.score.setTitle(_translate("Form", "评价"))
         self.fileOpenAction.setText(_translate("MainWindow", "打开"))

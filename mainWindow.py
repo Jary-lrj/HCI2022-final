@@ -50,15 +50,16 @@ class myMainWindow(Ui_Form, QMainWindow):
         self.video_full_screen_widget = myVideoWidget()
         self.video_full_screen_widget.setFullScreen(True)
         self.video_full_screen_widget.hide()
-        self.player = QMediaPlayer()
+        self.player = QMediaPlayer(self)
         self.player.setVideoOutput(self.video_area)
+        self.playlist = QMediaPlaylist(self)
+        self.player.setPlaylist(self.playlist)
+        self.playlist.setPlaybackMode(QMediaPlaylist.Loop)
 
+        self.video_list.itemClicked.connect(self.playVideoFromList)
+        self.previous.clicked.connect(self.preMedia)
+        self.next.clicked.connect(self.nextMedia)
         self.fileOpenAction.triggered.connect(self.openVideoFile)
-        # self.isPlaying = False
-        # if self.isPlaying:
-        #     self.play_button2.clicked.connect(self.pauseVideo)  # play video
-        # else:
-        #     self.play_button2.clicked.connect(self.playVideo)
 
         self.player.positionChanged.connect(self.changeSlide)  # change process slide of the video
         self.video_full_screen_widget.doubleClickedItem.connect(self.videoDoubleClicked)  # double click the video
@@ -67,6 +68,7 @@ class myMainWindow(Ui_Form, QMainWindow):
         self.video_process_slider.sliderReleased.connect(self.releaseSlider)
         self.video_process_slider.sliderPressed.connect(self.pressSlider)
         self.video_process_slider.sliderMoved.connect(self.moveSlider)
+
         self.test_thread = VideoThread()
         self.test_thread.setDaemon(True)  # it will close when the parent process closes.
         self.test_thread.start()
@@ -108,28 +110,41 @@ class myMainWindow(Ui_Form, QMainWindow):
             self.video_process.setText(str(round((position / self.video_length) * 100, 2)) + '%')
 
     def openVideoFile(self):
-        self.player.setMedia(QMediaContent(QFileDialog.getOpenFileUrl()[0]))  # 选取视频文件
-        self.player.play()  # 播放视频
+        mediaUrl = QFileDialog.getOpenFileUrl()[0]
+        self.player.setMedia(QMediaContent(mediaUrl))  # 选取视频文件
+        content = QListWidgetItem(mediaUrl.toString())
+        self.video_list.addItem(content)
+        self.playlist.addMedia(QMediaContent(mediaUrl))
+        if self.player.state() != QMediaPlayer.PlayingState:
+            self.playlist.setCurrentIndex(0)
+            self.player.play()
+
         self.play_button2.setPixmap(QPixmap('D:\\HCI2022\\final\\assets\\pause.png'))
         self.play_button2.clicked.connect(self.pauseVideo)
+        self.player.play()
 
     def playVideo(self):
         self.player.play()
         self.play_button2.setPixmap(QPixmap('D:\\HCI2022\\final\\assets\\pause.png'))
         self.play_button2.clicked.disconnect()
         self.play_button2.clicked.connect(self.pauseVideo)
-        print(1)
 
     def pauseVideo(self):
         self.player.pause()
         self.play_button2.clicked.disconnect()
         self.play_button2.setPixmap(QPixmap('D:\\HCI2022\\final\\assets\\play-button.png'))
         self.play_button2.clicked.connect(self.playVideo)
-        print(2)
+
+    def playVideoFromList(self, current):
+        index = self.video_list.row(current)
+        self.player.setMedia(self.playlist.currentMedia())
+        self.playlist.setCurrentIndex(index)
+        self.player.play()
 
     def videoDoubleClicked(self, text):
         if self.player.duration() > 0:
             if self.video_full_screen:
+
                 self.player.pause()
                 self.video_full_screen_widget.hide()
                 self.player.setVideoOutput(self.video_area)
@@ -142,11 +157,17 @@ class myMainWindow(Ui_Form, QMainWindow):
                 self.player.play()
                 self.video_full_screen = True
 
-    def test(self):
-        print(3)
+    def nextMedia(self):
+        self.playlist.setCurrentIndex(self.playlist.nextIndex())
+        self.video_list.setCurrentRow(self.playlist.currentIndex())
+        self.player.setMedia(self.playlist.media(self.playlist.currentIndex()))
+        self.player.play()
 
-    def test2(self):
-        print(4)
+    def preMedia(self):
+        self.playlist.setCurrentIndex(self.playlist.previousIndex())
+        self.video_list.setCurrentRow(self.playlist.currentIndex())
+        self.player.setMedia(self.playlist.media(self.playlist.currentIndex()))
+        self.player.play()
 
 
 if __name__ == "__main__":

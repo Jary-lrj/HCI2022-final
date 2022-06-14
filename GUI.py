@@ -27,7 +27,7 @@ class Ui_Form(object):
         self.play_button2 = ImgQLabel(Form)
         self.play_button2.setPixmap(QPixmap("D:\\HCI2022\\final\\assets\\play-button.png"))
         self.play_button2.setObjectName("play_button2")
-        self.play_button2.setGeometry(QtCore.QRect(440, 590, 91, 31))
+        self.play_button2.setGeometry(QtCore.QRect(450, 590, 91, 31))
         self.play_button2.setMaximumSize(25, 25)
         self.play_button2.setScaledContents(True)
 

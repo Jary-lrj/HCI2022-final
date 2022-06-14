@@ -1,13 +1,11 @@
+import math
 import threading
 
 import cv2
-import numpy as np
-from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtMultimedia import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from PyQt5.QtMultimediaWidgets import QVideoWidget
 from GUI import Ui_Form
 from myVideoWidget import myVideoWidget
 import sys
@@ -15,29 +13,46 @@ import HandTrackingThread as GestureThread  # Modules of hand tracking
 from qt_material import apply_stylesheet
 
 
-class VideoThread(threading.Thread):
+class VideoThread(QThread):
+    nextMedia = pyqtSignal(int)
+    preMedia = pyqtSignal(int)
+    like = pyqtSignal()
+    dislike = pyqtSignal()
+
     def __init__(self):
-        super().__init__()
+        super(VideoThread, self).__init__()
         self.detector = GestureThread.handDetector(detectionCon=0.75)
 
     def run(self):
+
         cap = cv2.VideoCapture(0)
+        i = 0
         while True:
             success, img = cap.read()
             img = self.detector.findHands(img)
             lm_list = self.detector.findPosition(img)
             if len(lm_list) != 0:
-                print(lm_list[0])
+                finger1_x, finger1_y = lm_list[4][1], lm_list[4][2]
+                finger2_x, finger2_y = lm_list[8][1], lm_list[8][2]
+                finger3_x, finger3_y = lm_list[12][1], lm_list[12][2]
+                finger4_x, finger4_y = lm_list[16][1], lm_list[16][2]
+                finger5_x, finger5_y = lm_list[20][1], lm_list[20][2]
+                if finger1_x > finger2_x and finger3_x < finger1_x and finger4_x < finger1_x and finger5_x < finger1_x:
+                    if lm_list[8][1] < lm_list[6][1] and lm_list[12][1] > lm_list[10][1] and lm_list[16][1] > \
+                            lm_list[14][1] and lm_list[20][1] > lm_list[18][1]:
+                        self.nextMedia.emit(1)
+                    elif lm_list[4][2] < lm_list[8][2]:
+                        print('like')  # show your like to the media
+                    else:
+                        print('dislike')  # show your dislike to the media
 
-
-class QSSLoader:
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def read_qss_file(qss_file_name):
-        with open(qss_file_name, 'r', encoding='UTF-8') as file:
-            return file.read()
+                elif finger1_x < finger2_x and finger3_x > finger1_x and finger4_x > finger1_x and finger5_x > finger1_x:
+                    if lm_list[8][1] > lm_list[6][1] and lm_list[12][1] < lm_list[10][1] and lm_list[16][1] < \
+                            lm_list[14][1] and lm_list[20][1] < lm_list[18][1]:
+                        self.preMedia.emit(1)
+                    elif lm_list[8][2] < lm_list[4][2]:
+                        length = math.hypot(lm_list[4][1] - lm_list[8][1], lm_list[4][2] - lm_list[8][2])
+                        print('volume: ', length)  # change volume of the media window
 
 
 class myMainWindow(Ui_Form, QMainWindow):
@@ -71,9 +86,13 @@ class myMainWindow(Ui_Form, QMainWindow):
         self.video_process_slider.sliderPressed.connect(self.pressSlider)
         self.video_process_slider.sliderMoved.connect(self.moveSlider)
 
-        self.test_thread = VideoThread()
-        self.test_thread.setDaemon(True)  # it will close when the parent process closes.
-        self.test_thread.start()
+        self.gestureThread = VideoThread()
+        self.gestureThread.start()
+        self.gestureThread.nextMedia.connect(self.nextMedia)  # gesture to change to next video
+        self.gestureThread.preMedia.connect(self.preMedia)
+        self.gestureThread.like.connect(self.like)
+        self.gestureThread.dislike.connect(self.dislike)
+        # self.gestureThread.volume.connect(self.volume)
 
     ###################################
     # function: move the process slider
@@ -177,6 +196,12 @@ class myMainWindow(Ui_Form, QMainWindow):
 
     def changeVolume(self, num):
         self.player.setVolume(num)
+
+    def setVideoSpeed(self, speed):
+        self.player.setPlaybackRate(speed)
+
+    def test(self):
+        print('test')
 
 
 if __name__ == "__main__":

@@ -1,7 +1,6 @@
 import math
-import threading
-
 import cv2
+import numpy as np
 from PyQt5.QtWidgets import *
 from PyQt5.QtMultimedia import *
 from PyQt5.QtGui import *
@@ -16,8 +15,9 @@ from qt_material import apply_stylesheet
 class VideoThread(QThread):
     nextMedia = pyqtSignal(int)
     preMedia = pyqtSignal(int)
-    like = pyqtSignal()
-    dislike = pyqtSignal()
+    like = pyqtSignal(int)
+    dislike = pyqtSignal(int)
+    volume = pyqtSignal(int)
 
     def __init__(self):
         super(VideoThread, self).__init__()
@@ -26,7 +26,6 @@ class VideoThread(QThread):
     def run(self):
 
         cap = cv2.VideoCapture(0)
-        i = 0
         while True:
             success, img = cap.read()
             img = self.detector.findHands(img)
@@ -42,9 +41,9 @@ class VideoThread(QThread):
                             lm_list[14][1] and lm_list[20][1] > lm_list[18][1]:
                         self.nextMedia.emit(1)
                     elif lm_list[4][2] < lm_list[8][2]:
-                        print('like')  # show your like to the media
+                        self.like.emit(1)  # show your like to the media
                     else:
-                        print('dislike')  # show your dislike to the media
+                        self.dislike.emit(1)  # show your dislike to the media
 
                 elif finger1_x < finger2_x and finger3_x > finger1_x and finger4_x > finger1_x and finger5_x > finger1_x:
                     if lm_list[8][1] > lm_list[6][1] and lm_list[12][1] < lm_list[10][1] and lm_list[16][1] < \
@@ -52,7 +51,8 @@ class VideoThread(QThread):
                         self.preMedia.emit(1)
                     elif lm_list[8][2] < lm_list[4][2]:
                         length = math.hypot(lm_list[4][1] - lm_list[8][1], lm_list[4][2] - lm_list[8][2])
-                        print('volume: ', length)  # change volume of the media window
+                        vol = np.interp(length, [10, 200], [0, 100])
+                        self.volume.emit(vol)
 
 
 class myMainWindow(Ui_Form, QMainWindow):
@@ -92,7 +92,7 @@ class myMainWindow(Ui_Form, QMainWindow):
         self.gestureThread.preMedia.connect(self.preMedia)
         self.gestureThread.like.connect(self.like)
         self.gestureThread.dislike.connect(self.dislike)
-        # self.gestureThread.volume.connect(self.volume)
+        self.gestureThread.volume.connect(self.changeVolume)
 
     ###################################
     # function: move the process slider
@@ -196,12 +196,25 @@ class myMainWindow(Ui_Form, QMainWindow):
 
     def changeVolume(self, num):
         self.player.setVolume(num)
+        self.player_volume.setValue(num)
 
     def setVideoSpeed(self, speed):
         self.player.setPlaybackRate(speed)
 
     def test(self):
         print('test')
+
+    def like(self, event):
+        QMessageBox.information(self, "提示", "收到您的喜欢！感谢您对本视频的喜欢！", QMessageBox.Yes, QMessageBox.Yes)
+
+    def dislike(self, event):
+        QMessageBox.information(self, "提示", "收到您的不喜欢！我们将努力提供更让您喜欢的内容！", QMessageBox.Yes, QMessageBox.Yes)
+
+    def goAhead15s(self):
+        pass
+
+    def goBack15s(self):
+        pass
 
 
 if __name__ == "__main__":

@@ -14,13 +14,13 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import QLabel
 from ImgQLabel import ImgQLabel
-
+from myVideoWidget import myVideoWidget
 
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(1024, 640)
-        self.video_area = QVideoWidget(Form)
+        self.video_area = myVideoWidget(Form)
         self.video_area.setGeometry(QtCore.QRect(0, 20, 791, 521))
         self.video_area.setObjectName("video_area")
 
@@ -29,7 +29,7 @@ class Ui_Form(object):
         self.play_button2.setPixmap(QPixmap("D:\\HCI2022\\final\\assets\\play-button.png"))
         self.play_button2.setObjectName("play_button2")
         self.play_button2.setGeometry(QtCore.QRect(450, 590, 91, 31))
-        self.play_button2.setMaximumSize(25, 25)
+        self.play_button2.setMaximumSize(30, 30)
         self.play_button2.setScaledContents(True)
 
         self.previous = ImgQLabel(Form)
@@ -54,8 +54,6 @@ class Ui_Form(object):
         self.menubar.setObjectName("menubar")
         self.file = QtWidgets.QMenu(self.menubar)
         self.file.setObjectName("file")
-        self.score = QtWidgets.QMenu(self.menubar)
-        self.score.setObjectName("score")
         self.video_process_slider = QtWidgets.QSlider(Form)
         self.video_process_slider.setGeometry(QtCore.QRect(0, 560, 801, 22))
         self.video_process_slider.setOrientation(QtCore.Qt.Horizontal)
@@ -73,25 +71,13 @@ class Ui_Form(object):
         self.player_volume.setGeometry(QtCore.QRect(730, 590, 111, 16))
         self.player_volume.setOrientation(QtCore.Qt.Horizontal)
         self.player_volume.setObjectName("player_volume")
-
         self.fileOpenAction = QtWidgets.QAction(Form)
         self.fileOpenAction.setObjectName("fileOpenAction")
-
         self.fileRemoveAction = QtWidgets.QAction(Form)
         self.fileRemoveAction.setObjectName("fileRemoveAction")
-
-        self.fileNewAction = QtWidgets.QAction(Form)
-        self.fileNewAction.setObjectName("fileNewAction")
-        self.fileCloseAction = QtWidgets.QAction(Form)
-        self.fileCloseAction.setObjectName("fileCloseAction")
         self.file.addAction(self.fileOpenAction)
-
         self.file.addAction(self.fileRemoveAction)
-
-        self.file.addAction(self.fileNewAction)
-        self.file.addAction(self.fileCloseAction)
         self.menubar.addAction(self.file.menuAction())
-        self.menubar.addAction(self.score.menuAction())
         Form.setMenuBar(self.menubar)
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
@@ -100,14 +86,7 @@ class Ui_Form(object):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
         self.file.setTitle(_translate("Form", "文件"))
-        self.score.setTitle(_translate("Form", "评价"))
         self.fileOpenAction.setText(_translate("MainWindow", "打开"))
         self.fileOpenAction.setShortcut(_translate("MainWindow", "Alt+O"))
-
         self.fileRemoveAction.setText(_translate("MainWindow", "移除当前文件"))
         self.fileRemoveAction.setShortcut(_translate("MainWindow", "Alt+S"))
-
-        self.fileNewAction.setText(_translate("MainWindow", "新建"))
-        self.fileNewAction.setShortcut(_translate("MainWindow", "Alt+N"))
-        self.fileCloseAction.setText(_translate("MainWindow", "关闭"))
-        self.fileCloseAction.setShortcut(_translate("MainWindow", "Alt+C"))

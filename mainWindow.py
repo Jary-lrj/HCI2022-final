@@ -220,7 +220,7 @@ class myMainWindow(Ui_Form, QMainWindow):
         if self.player.state() != QMediaPlayer.PlayingState:
             self.playlist.setCurrentIndex(self.playlist.currentIndex() + 1)
             self.player.play()
-        self.play_button2.setPixmap(QPixmap('D:\\HCI2022\\final\\assets\\pause.png'))
+        self.play_button2.setPixmap(QPixmap('./assets/pause.png'))
         self.play_button2.clicked.connect(self.pauseVideo)
         self.player.play()
 
@@ -240,7 +240,7 @@ class myMainWindow(Ui_Form, QMainWindow):
     #########################################
     def playVideo(self):
         self.player.play()
-        self.play_button2.setPixmap(QPixmap('D:\\HCI2022\\final\\assets\\pause.png'))
+        self.play_button2.setPixmap(QPixmap('./assets/pause.png'))
         self.play_button2.clicked.disconnect()
         self.play_button2.clicked.connect(self.pauseVideo)
 
@@ -250,7 +250,7 @@ class myMainWindow(Ui_Form, QMainWindow):
     def pauseVideo(self):
         self.player.pause()
         self.play_button2.clicked.disconnect()
-        self.play_button2.setPixmap(QPixmap('D:\\HCI2022\\final\\assets\\play-button.png'))
+        self.play_button2.setPixmap(QPixmap('./assets/play-button.png'))
         self.play_button2.clicked.connect(self.playVideo)
 
     ####################################################################
@@ -261,6 +261,9 @@ class myMainWindow(Ui_Form, QMainWindow):
         self.player.setMedia(self.playlist.media(index))
         self.playlist.setCurrentIndex(index)
         self.player.play()
+        self.play_button2.setPixmap(QPixmap('./assets/pause.png'))
+        self.play_button2.clicked.disconnect()
+        self.play_button2.clicked.connect(self.pauseVideo)
 
     ####################################################################
     # function: switch from full screen to a window form
@@ -288,6 +291,9 @@ class myMainWindow(Ui_Form, QMainWindow):
         self.video_list.setCurrentRow(self.playlist.currentIndex())
         self.player.setMedia(self.playlist.media(self.playlist.currentIndex()))
         self.player.play()
+        self.play_button2.setPixmap(QPixmap('./assets/pause.png'))
+        self.play_button2.clicked.disconnect()
+        self.play_button2.clicked.connect(self.pauseVideo)
 
     ######################################################
     # function: play the previous video in the video list.
@@ -297,6 +303,9 @@ class myMainWindow(Ui_Form, QMainWindow):
         self.video_list.setCurrentRow(self.playlist.currentIndex())
         self.player.setMedia(self.playlist.media(self.playlist.currentIndex()))
         self.player.play()
+        self.play_button2.setPixmap(QPixmap('./assets/pause.png'))
+        self.play_button2.clicked.disconnect()
+        self.play_button2.clicked.connect(self.pauseVideo)
 
     ###########################################
     # function: change the volume of the player

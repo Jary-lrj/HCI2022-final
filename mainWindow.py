@@ -1,4 +1,6 @@
 import math
+import threading
+
 import cv2
 import numpy as np
 from PyQt5.QtWidgets import *
@@ -8,6 +10,7 @@ from PyQt5.QtCore import *
 from GUI import Ui_Form
 from myVideoWidget import myVideoWidget
 import sys
+import time
 import HandTrackingThread as GestureThread  # Modules of hand tracking
 from qt_material import apply_stylesheet
 
@@ -19,15 +22,44 @@ class VideoThread(QThread):
     dislike = pyqtSignal(int)
     volume = pyqtSignal(int)
 
+    valueChange = pyqtSignal(int)
+
+    # valueChangeSignal = pyqtSignal(int)
     def __init__(self):
         super(VideoThread, self).__init__()
+        self.isPause = False
+        self.isCancel = False
+        self.cond = QWaitCondition()
+        self.mutex = QMutex()
         self.detector = GestureThread.handDetector(detectionCon=0.75)
+        self.cap = cv2.VideoCapture(0)
+
+    # 暂停
+    def pause(self):
+        print("线程暂停")
+        self.isPause = True
+
+    # 恢复
+    def resume(self):
+        print("线程恢复")
+        self.isPause = False
+        self.cond.wakeAll()
+
+    # 取消
+    def cancel(self):
+        print("线程取消")
+        self.isCancel = True
 
     def run(self):
-
-        cap = cv2.VideoCapture(0)
         while True:
-            success, img = cap.read()
+            time.sleep(1)
+            self.mutex.lock()
+            if self.isPause:
+                self.cond.wait(self.mutex)
+            if self.isCancel:
+                self.valueChange.emit(1)
+                break
+            success, img = self.cap.read()
             img = self.detector.findHands(img)
             lm_list = self.detector.findPosition(img)
             if len(lm_list) != 0:
@@ -53,6 +85,8 @@ class VideoThread(QThread):
                         length = math.hypot(lm_list[4][1] - lm_list[8][1], lm_list[4][2] - lm_list[8][2])
                         vol = np.interp(length, [10, 200], [0, 100])
                         self.volume.emit(vol)
+            # 线程锁off
+            self.mutex.unlock()
 
 
 class myMainWindow(Ui_Form, QMainWindow):
@@ -67,9 +101,11 @@ class myMainWindow(Ui_Form, QMainWindow):
         self.video_full_screen_widget.hide()
         self.player = QMediaPlayer(self)
         self.player.setVideoOutput(self.video_area)
+
         self.playlist = QMediaPlaylist(self)
         self.player.setPlaylist(self.playlist)
         self.playlist.setPlaybackMode(QMediaPlaylist.Loop)
+
         self.video_list.itemClicked.connect(self.playVideoFromList)
         self.previous.clicked.connect(self.preMedia)
         self.next.clicked.connect(self.nextMedia)
@@ -78,6 +114,9 @@ class myMainWindow(Ui_Form, QMainWindow):
         self.player_volume.setTickPosition(QSlider.TicksBelow)
         self.player_volume.valueChanged.connect(self.changeVolume)
         self.fileOpenAction.triggered.connect(self.openVideoFile)
+
+        self.fileRemoveAction.triggered.connect(self.removeVideoFile)
+        # self.fileOpenAction.triggered.connect(self.openVideoFile)
         self.player.positionChanged.connect(self.changeSlide)  # change process slide of the video
         self.video_full_screen_widget.doubleClickedItem.connect(self.videoDoubleClicked)  # double click the video
         # self.video_area.doubleClickedItem.connect(self.videoDoubleClicked)
@@ -138,18 +177,40 @@ class myMainWindow(Ui_Form, QMainWindow):
         mediaUrl = QFileDialog.getOpenFileUrl()[0]
         self.player.setMedia(QMediaContent(mediaUrl))  # 选取视频文件
         content = QListWidgetItem(mediaUrl.toString())
+
         self.video_list.addItem(content)
         self.playlist.addMedia(QMediaContent(mediaUrl))
+
         if self.player.state() != QMediaPlayer.PlayingState:
-            self.playlist.setCurrentIndex(0)
+            self.playlist.setCurrentIndex(self.playlist.currentIndex() + 1)
             self.player.play()
 
+        # self.play_button2.setPixmap(
+        #     QPixmap('C:\\Users\\86133\\Desktop\\HCI2022-final-main (1)\\HCI2022-final-main\\assets\\pause.png'))
         self.play_button2.setPixmap(QPixmap('D:\\HCI2022\\final\\assets\\pause.png'))
         self.play_button2.clicked.connect(self.pauseVideo)
         self.player.play()
 
+    def removeVideoFile(self):
+        # mediaUrl = QFileDialog.getOpenFileUrl()[0]
+        # self.player.setMedia(QMediaContent(mediaUrl))  # 选取视频文件
+        # content = QListWidgetItem(mediaUrl.toString())
+        # nextIndex
+        # self.video_list.addItem(content)
+        print(self.playlist.currentIndex())
+
+        self.video_list.takeItem(self.playlist.currentIndex())
+        self.playlist.removeMedia(self.playlist.currentIndex())
+        # self.playlist.setCurrentIndex(self.playlist.nextIndex())
+        self.player.setMedia(self.playlist.media(self.playlist.currentIndex()))
+        print(self.playlist.currentIndex())
+
+        self.player.play()
+
     def playVideo(self):
         self.player.play()
+        # self.play_button2.setPixmap(
+        #     QPixmap('C:\\Users\\86133\\Desktop\\HCI2022-final-main (1)\\HCI2022-final-main\\assets\\pause.png'))
         self.play_button2.setPixmap(QPixmap('D:\\HCI2022\\final\\assets\\pause.png'))
         self.play_button2.clicked.disconnect()
         self.play_button2.clicked.connect(self.pauseVideo)
@@ -157,6 +218,8 @@ class myMainWindow(Ui_Form, QMainWindow):
     def pauseVideo(self):
         self.player.pause()
         self.play_button2.clicked.disconnect()
+        # self.play_button2.setPixmap(
+        #     QPixmap('C:\\Users\\86133\\Desktop\\HCI2022-final-main (1)\\HCI2022-final-main\\assets\\play-button.png'))
         self.play_button2.setPixmap(QPixmap('D:\\HCI2022\\final\\assets\\play-button.png'))
         self.play_button2.clicked.connect(self.playVideo)
 
@@ -205,10 +268,18 @@ class myMainWindow(Ui_Form, QMainWindow):
         print('test')
 
     def like(self, event):
-        QMessageBox.information(self, "提示", "收到您的喜欢！感谢您对本视频的喜欢！", QMessageBox.Yes, QMessageBox.Yes)
+        self.gestureThread.pause()
+        reply = QMessageBox.information(self, "提示", "收到您的喜欢，请重复确认！感谢您对本视频的喜欢！", QMessageBox.Yes | QMessageBox.No,
+                                        QMessageBox.Yes)
+        if reply == QMessageBox.Yes:
+            self.gestureThread.resume()
 
     def dislike(self, event):
-        QMessageBox.information(self, "提示", "收到您的不喜欢！我们将努力提供更让您喜欢的内容！", QMessageBox.Yes, QMessageBox.Yes)
+        self.gestureThread.pause()
+        reply = QMessageBox.information(self, "提示", "收到您的不喜欢，请重复确认！我们将努力提供更让您喜欢的内容！", QMessageBox.Yes | QMessageBox.No,
+                                        QMessageBox.Yes)
+        if reply == QMessageBox.Yes:
+            self.gestureThread.resume()
 
     def goAhead15s(self):
         pass

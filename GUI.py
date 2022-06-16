@@ -19,12 +19,13 @@ from ImgQLabel import ImgQLabel
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(1024,640)
+        Form.resize(1024, 640)
         self.video_area = QVideoWidget(Form)
         self.video_area.setGeometry(QtCore.QRect(0, 20, 791, 521))
         self.video_area.setObjectName("video_area")
 
         self.play_button2 = ImgQLabel(Form)
+        # self.play_button2.setPixmap(QPixmap("C:\\Users\\86133\\Desktop\\HCI2022-final-main (1)\\HCI2022-final-main\\assets\\play-button.png"))
         self.play_button2.setPixmap(QPixmap("D:\\HCI2022\\final\\assets\\play-button.png"))
         self.play_button2.setObjectName("play_button2")
         self.play_button2.setGeometry(QtCore.QRect(450, 590, 91, 31))
@@ -33,6 +34,7 @@ class Ui_Form(object):
 
         self.previous = ImgQLabel(Form)
         self.previous.setPixmap(QPixmap("D:\\HCI2022\\final\\assets\\previous.png"))
+        # self.previous.setPixmap(QPixmap("C:\\Users\\86133\\Desktop\\HCI2022-final-main (1)\\HCI2022-final-main\\assets\\previous.png"))
         self.previous.setObjectName("previous")
         self.previous.setGeometry(QtCore.QRect(300, 590, 71, 41))
         self.previous.setMaximumSize(25, 25)
@@ -40,6 +42,7 @@ class Ui_Form(object):
 
         self.next = ImgQLabel(Form)
         self.next.setPixmap(QPixmap("D:\\HCI2022\\final\\assets\\next.png"))
+        # self.next.setPixmap(QPixmap("C:\\Users\\86133\\Desktop\\HCI2022-final-main (1)\\HCI2022-final-main\\assets\\next.png"))
         self.next.setObjectName("next")
         self.next.setGeometry(QtCore.QRect(580, 590, 71, 41))
         self.next.setMaximumSize(25, 25)
@@ -61,6 +64,7 @@ class Ui_Form(object):
         self.video_process.setGeometry(QtCore.QRect(820, 560, 100, 21))
         self.video_process.setStyleSheet("font: 10pt \"Times New Roman\";")
         self.video_process.setObjectName("video_process")
+
         self.video_list = QtWidgets.QListWidget(Form)
         self.video_list.setGeometry(QtCore.QRect(790, 30, 235, 521))
         self.video_list.setObjectName("video_list")
@@ -69,13 +73,21 @@ class Ui_Form(object):
         self.player_volume.setGeometry(QtCore.QRect(730, 590, 111, 16))
         self.player_volume.setOrientation(QtCore.Qt.Horizontal)
         self.player_volume.setObjectName("player_volume")
+
         self.fileOpenAction = QtWidgets.QAction(Form)
         self.fileOpenAction.setObjectName("fileOpenAction")
+
+        self.fileRemoveAction = QtWidgets.QAction(Form)
+        self.fileRemoveAction.setObjectName("fileRemoveAction")
+
         self.fileNewAction = QtWidgets.QAction(Form)
         self.fileNewAction.setObjectName("fileNewAction")
         self.fileCloseAction = QtWidgets.QAction(Form)
         self.fileCloseAction.setObjectName("fileCloseAction")
         self.file.addAction(self.fileOpenAction)
+
+        self.file.addAction(self.fileRemoveAction)
+
         self.file.addAction(self.fileNewAction)
         self.file.addAction(self.fileCloseAction)
         self.menubar.addAction(self.file.menuAction())
@@ -91,6 +103,10 @@ class Ui_Form(object):
         self.score.setTitle(_translate("Form", "评价"))
         self.fileOpenAction.setText(_translate("MainWindow", "打开"))
         self.fileOpenAction.setShortcut(_translate("MainWindow", "Alt+O"))
+
+        self.fileRemoveAction.setText(_translate("MainWindow", "移除当前文件"))
+        self.fileRemoveAction.setShortcut(_translate("MainWindow", "Alt+S"))
+
         self.fileNewAction.setText(_translate("MainWindow", "新建"))
         self.fileNewAction.setShortcut(_translate("MainWindow", "Alt+N"))
         self.fileCloseAction.setText(_translate("MainWindow", "关闭"))
